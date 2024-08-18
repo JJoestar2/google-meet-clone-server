@@ -14,12 +14,12 @@ passport.use(
         try {
             const user = await getUserById(payload.id);
 
-            if(user) {
-                return done(null, user);
-            }
+            if (!user) return done(null, false);
+
+            return done(null, user);
+            
         } catch (error) {
             return done(error);
         }
-
     }),
 );

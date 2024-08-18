@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 import UsersService from "./UsersService.js";
+import RefreshTokenService from "./RefreshTokenService.js";
 
 class AuthService {
     saltOrRounds = 10;
@@ -9,26 +10,20 @@ class AuthService {
     static loginUser = async ({ email, password }) => {
         const user = await UsersService.getUserByEmail(email);
     
-        if (!user) return null;
+        if (!user) return { success: false, status: 404, message: 'User not found' };
     
         const isPasswordMatched = await bcrypt.compare(password, user?.password);
     
-        if(!isPasswordMatched) return null;
-    
-        const userPayload = {
-            sub: user._id,
-            name: user.name,
-            email: user.email,
-            avatar: user.avatar || "",
+        if(!isPasswordMatched) return { success: false, status: 401, message: 'Invalid password or email.' };
+
+        const tokens = await RefreshTokenService.generateTokens(user);
+
+        return {
+            status: 200,
+            success: true,
+            message: '',
+            ...tokens,
         };
-    
-        const accessToken = jwt.sign(
-            userPayload,
-            process.env.JWT_SECRET,
-            { expiresIn: "1d" }
-        );
-    
-        return { user: userPayload, accessToken };
     }
     
     static registerUser = async ({ name, email, password, avatar }) => {
@@ -43,6 +38,50 @@ class AuthService {
         };
     
         return userPayload;
+    }
+
+    static getNewToken = async(refreshToken) => {
+        if (!refreshToken) return;
+
+        RefreshTokenService.verifyRefreshToken(refreshToken)
+        .then(({ tokenDetails }) => {
+            const payload = {
+                sub: tokenDetails.sub,
+                name: tokenDetails.name,
+                email: tokenDetails.email,
+                avatar: tokenDetails.avatar,
+            };
+
+            const accessToken = jwt.sign(
+                payload,
+                process.env.JWT_SECRET,
+                { expires: "1m" }
+            );
+
+            return { error: false, accessToken };
+        })
+        .catch(({ message }) => {
+            console.error(message);
+            return {
+                error: true,
+                message,
+            }
+        });
+    }
+
+    static logout = async (refreshToken) => {
+        if (!refreshToken) return;
+        try {  
+            await RefreshTokenService.removeToken(refreshToken);
+            return { error: false, status: 200, message: "Logged Out Successfully" };
+        } catch (error) {
+            console.log(err);
+            return {
+                error: true,
+                status: 500,
+                message: "Internal server error"
+            }
+        }
     }
 }
 

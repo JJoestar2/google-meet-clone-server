@@ -4,12 +4,10 @@ class AuthController {
     
     static login = async (req, res) => {
         try {
-            const { user, accessToken } = await AuthService.loginUser(req.body);
-    
-            return res.status(200).json({
-                user,
-                accessToken,
-            });
+            const { success, status, user, accessToken, message } = await AuthService.loginUser(req.body);
+            
+            if (success) return res.status(status).json({ user, accessToken });
+            else return res.status(status).json({ message });
         } catch (error) {
            res.status(500);
            console.log(error);
@@ -19,12 +17,38 @@ class AuthController {
     static register = async (req, res) => {
         try {
             const user = await AuthService.registerUser(req.body);
-            return res.status(201).json({ user });
+            if (user) return res.status(201).json({ user });
         } catch (error) {
            res.status(500);
            console.log(error);
         }
     }
+
+    static logout = async (req, res) => {
+        try {
+            const { error, message } = await AuthService.logout(req.body.refreshToken);
+
+            if (error) res.status(500).json({ message });
+
+            return res.status(201).json({ message });
+        } catch (error) {
+           res.status(500);
+           console.log(error);
+        }
+    };
+
+    static getNewToken = async (req, res) => {
+        try {
+            const { error, accessToken } = await AuthService.getNewToken(req.body.refreshToken);
+            
+            if (error) res.status(500).json({ message });
+
+            return res.status(201).json({ accessToken });
+        } catch (error) {
+           res.status(500);
+           console.log(error);
+        }
+    };
 }
 
 export default AuthController;

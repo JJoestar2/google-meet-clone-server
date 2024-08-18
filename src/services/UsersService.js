@@ -9,22 +9,22 @@ class UsersService {
             .lean();
         } catch (error) {
             console.log(`Error occured ${error}`);
-            throw new Error(error);
+            return new Error(error);
         }   
     };
     
     static getUserByEmail  = (email) => {
         const user = UserModel.findOne({ email }).lean();
-        if (!user) throw new Error('Not found user');
+        if (!user) return new Error('Not found user');
     
         return user;
     }
     
     static getUserById = async (id, projection = null, lean = true) => {
         const user = await UserModel.findById(id, projection).lean(lean);
-        if (!user) throw new Error('Not found user');
+        if (!user) return { success: false, message: 'Not found user', status: 404, user: null };
     
-        return user;
+        return { success: true, status: 200, message: '', user };
     }
     
     static getByEmailAndUpdateActivity = async (email) => {
@@ -49,11 +49,11 @@ class UsersService {
     
     static deleteUser = (id) => {
         const user = UserModel.findById(id);
-        if (!user) throw new Error('Not found user');
+        if (!user) return { success: false, message: 'Not found user', status: 404 };
     
         user.deleteOne({ id });
     
-        return user;
+        return { success: true, message: 'Deleted user', status: 200, user };
     }
 }
 
