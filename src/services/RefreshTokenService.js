@@ -16,7 +16,7 @@ class RefreshTokenService {
             const accessToken = jwt.sign(
                 userPayload,
                 process.env.JWT_SECRET,
-                { expiresIn: "1m" }
+                { expiresIn: "2m" }
             );
     
             const refreshToken = jwt.sign(
@@ -26,7 +26,7 @@ class RefreshTokenService {
             );
     
             const userToken = await UserTokenModel.findOne({ userId: user._id }).lean();
-            if (userToken) await userToken.remove();
+            if (userToken) await UserTokenModel.deleteOne({ token: userToken.token });
     
             await new UserTokenModel({ userId: user._id, token: refreshToken }).save();
         
@@ -45,7 +45,7 @@ class RefreshTokenService {
     
             if (!token) reject({ error: true, message: "Invalid refresh token" });
     
-            jwt.verify(token, process.env.JWT_REFRESH_SECRET, (err, tokenDetails) => {
+            jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, tokenDetails) => {
                 if (err) return reject({ error: true, message: "Invalid refresh token" });
                 
                 resolve({
@@ -64,7 +64,7 @@ class RefreshTokenService {
 
         if (!token) return { error: true, status: 404, message: "Token not found" };
 
-        await token.remove();
+        await UserTokenModel.deleteOne({ token: refreshToken });
 
         return {
             status: 200,

@@ -1,10 +1,12 @@
 import express from "express";
 import passport from "passport";
 
-import "../strategies/jwt-strategy.js";
+import { strategy } from '../strategies/jwt-strategy.js';
 
 import UsersController from "../controllers/UsersController.js";
 import AuthController from "../controllers/AuthController.js";
+
+passport.use(strategy);
 
 const router = express.Router();
 // users

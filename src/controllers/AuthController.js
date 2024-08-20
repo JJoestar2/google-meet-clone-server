@@ -4,9 +4,9 @@ class AuthController {
     
     static login = async (req, res) => {
         try {
-            const { success, status, user, accessToken, message } = await AuthService.loginUser(req.body);
+            const { success, status, user, accessToken, refreshToken, message } = await AuthService.loginUser(req.body);
             
-            if (success) return res.status(status).json({ user, accessToken });
+            if (success) return res.status(status).json({ user, accessToken, refreshToken });
             else return res.status(status).json({ message });
         } catch (error) {
            res.status(500);
@@ -39,13 +39,12 @@ class AuthController {
 
     static getNewToken = async (req, res) => {
         try {
-            const { error, accessToken } = await AuthService.getNewToken(req.body.refreshToken);
+            const { error, message, accessToken } = await AuthService.getNewToken(req.body.refreshToken);
             
-            if (error) res.status(500).json({ message });
+            if (error) res.json({ message });
 
-            return res.status(201).json({ accessToken });
+            return res.json({ accessToken });
         } catch (error) {
-           res.status(500);
            console.log(error);
         }
     };

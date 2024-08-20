@@ -43,7 +43,7 @@ class AuthService {
     static getNewToken = async(refreshToken) => {
         if (!refreshToken) return;
 
-        RefreshTokenService.verifyRefreshToken(refreshToken)
+        const res = await RefreshTokenService.verifyRefreshToken(refreshToken)
         .then(({ tokenDetails }) => {
             const payload = {
                 sub: tokenDetails.sub,
@@ -55,7 +55,7 @@ class AuthService {
             const accessToken = jwt.sign(
                 payload,
                 process.env.JWT_SECRET,
-                { expires: "1m" }
+                { expiresIn: "2m" }
             );
 
             return { error: false, accessToken };
@@ -67,6 +67,8 @@ class AuthService {
                 message,
             }
         });
+
+        return res;
     }
 
     static logout = async (refreshToken) => {

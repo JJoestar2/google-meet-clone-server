@@ -1,25 +1,27 @@
 import { ExtractJwt, Strategy } from "passport-jwt";
-import passport from "passport";
 
-import { getUserById } from "../services/UsersService";
+import UsersService from "../services/UsersService.js";
 
 const jwtConfig = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.JWT_SECRET,
+    // process.env.JWT_SECRET,
+    secretOrKey: 'XLV89iuI6G7Jo5ucsf3RUpr00MpDXfNL',
     ignoreExpiration: false,
 };
 
-passport.use(
-    new Strategy(jwtConfig, async (payload, done) => {
-        try {
-            const user = await getUserById(payload.id);
+console.log(process.env.JWT_SECRET);
 
-            if (!user) return done(null, false);
+const verifyJWT = async (payload, done) => {
+    try {
+        const user = await UsersService.getUserById(payload.id);
 
-            return done(null, user);
-            
-        } catch (error) {
-            return done(error);
-        }
-    }),
-);
+        if (!user) return done(null, false);
+
+        return done(null, user);
+        
+    } catch (error) {
+        return done(error);
+    }
+};
+
+export const strategy = new Strategy(jwtConfig, verifyJWT);
