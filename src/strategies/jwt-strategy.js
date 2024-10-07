@@ -4,12 +4,9 @@ import UsersService from "../services/UsersService.js";
 
 const jwtConfig = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    // process.env.JWT_SECRET,
-    secretOrKey: 'XLV89iuI6G7Jo5ucsf3RUpr00MpDXfNL',
+    secretOrKey:process.env.JWT_SECRET,
     ignoreExpiration: false,
 };
-
-console.log(process.env.JWT_SECRET);
 
 const verifyJWT = async (payload, done) => {
     try {

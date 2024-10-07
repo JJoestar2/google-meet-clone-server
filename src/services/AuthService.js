@@ -55,7 +55,7 @@ class AuthService {
             const accessToken = jwt.sign(
                 payload,
                 process.env.JWT_SECRET,
-                { expiresIn: "2m" }
+                { expiresIn: "15m" }
             );
 
             return { error: false, accessToken };

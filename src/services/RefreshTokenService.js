@@ -16,13 +16,13 @@ class RefreshTokenService {
             const accessToken = jwt.sign(
                 userPayload,
                 process.env.JWT_SECRET,
-                { expiresIn: "2m" }
+                { expiresIn: "15m" }
             );
     
             const refreshToken = jwt.sign(
                 userPayload,
                 process.env.JWT_REFRESH_SECRET,
-                { expiresIn: "3m" }
+                { expiresIn: "31d" }
             );
     
             const userToken = await UserTokenModel.findOne({ userId: user._id }).lean();

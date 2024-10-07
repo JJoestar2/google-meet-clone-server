@@ -25,9 +25,6 @@ router.delete(
 );
 
 // refresh token
-router.post('/refresh',
-    passport.authenticate("jwt", { session: false }),
-    (req, res) => AuthController.getNewToken(req, res),
-);
+router.post('/refresh', AuthController.getNewToken);
 
 export default router;
